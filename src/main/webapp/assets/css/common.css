@@ -1,0 +1,49 @@
+body {
+	font-family: 'Noto Sans KR', sans-serif;
+	color: #141e3c;
+}
+
+.content {
+	margin: 60px;
+	min-height: 600px;
+}
+
+.caption {
+	text-align: center;
+}
+
+.caption-content {
+	font-size: 1em;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.thumbnail-hr {
+	margin: 10px 0;
+}
+
+img {
+	width: 350px;
+	height: 230px;
+}
+
+.identify {
+	font-size: 14px;
+	color: #f00;
+}
+
+.page-header {
+	border-bottom: 2px solid #141e3c;
+}
+
+.pageInfo {
+	text-align:center;
+	color : #fff;
+	background-color: #141e3c;
+	
+}
+
+.sodyd {
+	font-size: 16px;
+}

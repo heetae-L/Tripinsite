@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="ApiMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="api"
+		type="project.com.tripinsite.model.Api">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="contentid" column="contentid" />
+		<result property="title" column="title" />
+		<result property="areacode" column="areacode" />
+		<result property="sigungucode" column="sigungucode" />
+		<result property="addr1" column="addr1" />
+		<result property="addr2" column="addr2" />
+		<result property="contenttypeid" column="contenttypeid" />
+		<result property="mapx" column="mapx" />
+		<result property="mapy" column="mapy" />
+		<result property="tel" column="tel" />
+	</resultMap>
+
+	<!-- Api 다중행 조회(목록조회)를 위한 기능 정의 <select id="메서드이름" resultMap="리턴될 Beans의 id"> -->
+	<select id="selectApiList"
+		parameterType="project.com.tripinsite.model.Api" resultMap="api">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT * FROM api
+	</select>
+	
+	<!-- Api 저장 전에 같은 Api 이미 존재하는지 contentid와 title로 조회하기 -->
+	<select id="selectApi" parameterType="project.com.tripinsite.model.Api" resultType="int" >
+		SELECT 
+			contentid, title, areacode, sigungucode, addr1, addr2, 
+			contenttypeid, mapx, mapy, tel
+		FROM api 
+		WHERE contentid = #{contentid}
+		<if test="title != null">
+			AND title = #{title}
+		</if> 		
+	</select>
+	
+	<!-- Api 임시 저장하기  (contentid는 고유값이므로 그대로 사용한다.)-->
+	<insert id="insertApi" parameterType="project.com.tripinsite.model.Api" 
+		useGeneratedKeys="false" keyProperty="contentid">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		INSERT INTO api 
+			(contentid, title, areacode, sigungucode, addr1, addr2, contenttypeid, mapx, mapy, tel) 
+		VALUES 
+			(#{contentid}, #{title}, #{areacode}, #{sigungucode}, #{addr1}, #{addr2}, 
+			#{contenttypeid}, #{mapx}, #{mapy}, #{tel})
+	</insert>
+	
+	<!-- Api 수정하기 -->
+	<update id="updateApi" parameterType="project.com.tripinsite.model.Api">
+		UPDATE api
+		SET (title=#{title}, areacode=#{areacode}, sigungucode=#{sigungucode}, 
+			addr1=#{addr1}, addr2=#{addr2}, contenttypeid=#{contenttypeid}, 
+			mapx=#{mapx}, mapy=#{mapy}, tel=#{tel})
+		WHERE contentid=#{contentid}
+	</update>
+	
+	<!-- Api 삭제하기 -->
+	<delete id="deleteApi" parameterType="project.com.tripinsite.model.Api">
+		DELETE FROM api
+		WHERE contentid=#{contentid}
+	</delete>
+	
+</mapper>

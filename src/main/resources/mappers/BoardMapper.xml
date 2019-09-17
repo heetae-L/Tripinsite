@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="BoardMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="board"
+		type="project.com.tripinsite.model.Board">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idboard" column="idboard" />
+		<result property="category" column="category" />
+		<result property="member_id" column="member_id" />
+		<result property="subject" column="subject" />
+		<result property="writer_nickname" column="writer_nickname" />
+		<result property="writer_pw" column="writer_pw" />
+		<result property="content" column="content" />
+		<result property="hit" column="hit" />
+		<result property="reg_date" column="reg_date" />
+		<result property="edit_date" column="edit_date" />
+		<result property="ip_address" column="ip_address" />
+		<result property="is_notice" column="is_notice" />
+	</resultMap>
+
+	<!-- 다중행 조회(목록조회)를 위한 기능 정의 <select id="메서드이름" resultMap="리턴될 Beans의 id"> -->
+	<select id="selectBoardList"
+		parameterType="project.com.tripinsite.model.Board" resultMap="board">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT idboard, subject, hit, writer_nickname FROM board
+		WHERE
+		is_notice=0 AND
+		category=#{category}
+		<if test="subject != null or content != null">
+			AND (
+			<if test="subject != null">
+				subject LIKE concat('%', #{subject}, '%')
+			</if>
+			<if test="content != null">
+				OR content LIKE concat('%', #{content}, '%')
+			</if>
+			)
+		</if>
+		ORDER BY idboard DESC
+		LIMIT #{limitStart}, #{listCount}
+	</select>
+
+	<!-- 공지목록조회 -->
+	<select id="selectBoardNoticeList"
+		parameterType="project.com.tripinsite.model.Board" resultMap="board">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT idboard, subject, hit, writer_nickname FROM board
+		WHERE
+		is_notice=1 AND
+		category=#{category}
+		ORDER BY idboard DESC LIMIT 0, 3
+	</select>
+
+	<!-- 게시글 정보 저장하기 -->
+	<insert id="insertBoard"
+		parameterType="project.com.tripinsite.model.Board"
+		useGeneratedKeys="true" keyProperty="idboard">
+		INSERT INTO board (
+		category, subject, writer_nickname, content, hit,
+		reg_date, edit_date,
+		ip_address, is_notice, member_id, writer_pw
+		)
+		VALUES (
+		#{category}, #{subject}, #{writer_nickname}, #{content}, 0,
+		now(), now(),
+		#{ip_address}, #{is_notice},
+
+		<choose>
+			<when test="member_id == 0">
+				null, password(#{writer_pw})
+			</when>
+			<otherwise>
+				#{member_id}, #{writer_pw}
+			</otherwise>
+		</choose>
+		)
+	</insert>
+
+	<!-- 게시물 하나에 대한 정보를 조회한다. -->
+	<select id="selectBoard"
+		parameterType="project.com.tripinsite.model.Board" resultMap="board">
+		SELECT
+		idboard, category, subject, hit, writer_nickname, content,
+		DATE_FORMAT(reg_date, '%Y-%m-%d
+		%H:%i:%s') as reg_date,
+		ip_address,
+		member_id
+		FROM board
+		WHERE
+		category=#{category} AND idboard=#{idboard}
+	</select>
+
+	<!-- 공지하나조회 -->
+	<select id="selectBoardNotice"
+		parameterType="project.com.tripinsite.model.Board" resultMap="board">
+		SELECT
+		idboard, category, subject, hit, writer_nickname, content,
+		DATE_FORMAT(reg_date, '%Y-%m-%d
+		%H:%i:%s') as reg_date,
+		ip_address,
+		member_id
+		FROM board
+		WHERE is_notice=1 AND
+		category=#{category} AND
+		idboard=#{idboard}
+	</select>
+
+	<!-- 이전글 정보를 조회한다. -->
+	<select id="selectPrevBoard"
+		parameterType="project.com.tripinsite.model.Board" resultMap="board">
+		SELECT
+		idboard, subject, hit, writer_nickname, content,
+		DATE_FORMAT(reg_date,
+		'%Y-%m-%d
+		%H:%i:%s') as reg_date,
+		ip_address, member_id
+		FROM board
+		WHERE
+		category=#{category} AND idboard &lt;
+		#{idboard}
+		ORDER BY idboard DESC
+		LIMIT 0, 1
+	</select>
+
+	<!-- 다음글 정보를 조회한다. -->
+	<select id="selectNextBoard"
+		parameterType="project.com.tripinsite.model.Board" resultMap="board">
+		SELECT
+		idboard, subject, hit, writer_nickname, content,
+		DATE_FORMAT(reg_date,
+		'%Y-%m-%d
+		%H:%i:%s') as reg_date,
+		ip_address, member_id
+		FROM board
+		WHERE
+		category=#{category} AND idboard &gt;
+		#{idboard}
+		ORDER BY idboard ASC
+		LIMIT 0, 1
+	</select>
+
+	<!-- 조회수 1 증가 -->
+	<update id="updateBoardHit"
+		parameterType="project.com.tripinsite.model.Board">
+		UPDATE board SET hit=hit+1
+		WHERE category=#{category}
+		AND
+		idboard=#{idboard}
+	</update>
+
+	<!-- 전체 게시물 수를 조회한다. -->
+	<select id="selectBoardCount"
+		parameterType="project.com.tripinsite.model.Board" resultType="int">
+		SELECT COUNT(idboard) FROM board
+		<where>
+			is_notice=0 AND
+			category=#{category}
+			<if test="subject != null or content != null">
+				AND (
+				<if test="subject != null">
+					subject LIKE concat('%', #{subject}, '%')
+				</if>
+				<if test="content != null">
+					OR content LIKE concat('%', #{content}, '%')
+				</if>
+				)
+			</if>
+		</where>
+	</select>
+
+	<!-- 자신의 게시물인지 검사한다 -->
+	<select id="selectBoardCountByMemberId"
+		parameterType="project.com.tripinsite.model.Board" resultType="int">
+		SELECT
+		COUNT(idboard) FROM board
+		WHERE category=#{category} AND
+		idboard=#{idboard} AND member_id=#{member_id}
+	</select>
+
+	<!-- 비밀번호를 검사한다. -->
+	<select id="selectBoardCountByPw"
+		parameterType="project.com.tripinsite.model.Board" resultType="int">
+		SELECT
+		COUNT(idboard) FROM board
+		WHERE category=#{category} AND
+		idboard=#{idboard} AND
+		writer_pw=password(#{writer_pw})
+	</select>
+
+	<!-- 게시글 삭제 하기 -->
+	<delete id="deleteBoard"
+		parameterType="project.com.tripinsite.model.Board">
+		DELETE FROM board WHERE idboard=#{idboard}
+	</delete>
+
+	<!-- 게시글 정보 수정하기 -->
+	<update id="updateBoard"
+		parameterType="project.com.tripinsite.model.Board">
+		UPDATE board
+		SET category=#{category},
+		writer_nickname=#{writer_nickname},
+		subject=#{subject},
+		content=#{content},
+		ip_address=#{ip_address},
+		edit_date=now()
+		WHERE
+		idboard=#{idboard}
+	</update>
+
+	<!-- 특정 회원과의 게시물 참조 해제하기 -->
+	<update id="updateBoardMemberOut"
+		parameterType="project.com.tripinsite.model.Board">
+		UPDATE board
+		SET member_id=NULL, edit_date=now()
+		WHERE
+		member_id=#{member_id}
+	</update>
+
+	<!-- ~~~~~~~~~~~~~~~~~~~~~~ 관리자페이지사용 Mapper~~~~~~~~~~~~~~~~~~ -->
+	<!-- 관리자권한 게시물 목록 조회 -->
+	<select id="selectBoardListByAdmin"
+		parameterType="project.com.tripinsite.model.Board" resultMap="board">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT idboard, category, subject, writer_nickname,
+		DATE_FORMAT(reg_date, '%Y-%m-%d') as reg_date, is_notice FROM board
+		<where>
+		<if test="subject != null">
+			subject LIKE concat('%', #{subject}, '%')
+		</if>
+		<if test="content != null">
+			OR content LIKE concat('%', #{content}, '%')
+		</if>
+		</where>
+		ORDER BY idboard DESC
+		LIMIT #{limitStart}, #{listCount}
+	</select>
+
+	<!-- 관리자페이지에서 전체 게시물 수를 조회한다. -->
+	<select id="selectBoardCountByAdmin"
+		parameterType="project.com.tripinsite.model.Board" resultType="int">
+		SELECT COUNT(idboard) FROM board
+		<where>
+		<if test="subject != null">
+			subject LIKE concat('%', #{subject}, '%')
+		</if>
+		<if test="content != null">
+			OR content LIKE concat('%', #{content}, '%')
+		</if>
+		</where>
+	</select>
+	<!-- 게시글 정보 저장하기 -->
+	<insert id="insertBoardByAdmin"
+		parameterType="project.com.tripinsite.model.Board"
+		useGeneratedKeys="true" keyProperty="idboard">
+		INSERT INTO board (
+		category, subject, writer_nickname, content, hit,
+		reg_date, edit_date,
+		ip_address, is_notice, member_id, writer_pw
+		)
+		VALUES (
+		#{category}, #{subject}, #{writer_nickname}, #{content}, 0,
+		now(), now(),
+		#{ip_address}, #{is_notice}, #{member_id}, #{writer_pw}		
+		)
+	</insert>
+	<!-- 작성된 게시글 id 조회 -->
+	<select id="selectBoardid"
+		parameterType="project.com.tripinsite.model.Board" resultType="int">
+		SELECT idboard FROM board
+		WHERE is_notice=1
+		ORDER BY idboard DESC
+		LIMIT 0,1
+	</select>
+	<!-- 공지사항 수정 -->
+	<update id="updateNotice"
+		parameterType="project.com.tripinsite.model.Board">
+		UPDATE board
+		SET category=#{category},
+		subject=#{subject},
+		content=#{content},
+		edit_date=now() 
+		WHERE
+		idboard=#{idboard}
+	</update>
+	<!-- 게시판 작성자 정보 조회 -->
+	<select id="selectBoardByAdmin" parameterType="project.com.tripinsite.model.Board" resultMap="board">
+		SELECT idboard, writer_nickname, writer_pw
+		FROM board
+		WHERE idboard = ${idboard}
+	</select>
+	
+	<!-- 스토리 게시글 정보 저장하기 -->
+	<insert id="insertStoryBoard"
+		parameterType="project.com.tripinsite.model.Board"
+		useGeneratedKeys="true" keyProperty="idboard">
+		INSERT INTO board (
+		category, subject, writer_nickname, content, hit,
+		reg_date, edit_date,
+		ip_address, is_notice, member_id, writer_pw
+		)
+		VALUES (
+		#{category}, #{subject}, #{writer_nickname}, #{content}, 0,
+		now(), now(),
+		#{ip_address}, #{is_notice}, #{member_id}, #{writer_pw}
+		)
+		<selectKey resultType="int" keyProperty="idboard" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	
+</mapper>

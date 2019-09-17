@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="Sche_tableMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="sche_table"
+		type="project.com.tripinsite.model.Sche_table">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idsche_table" column="idsche_table" />
+		<result property="api_contentid" column="api_contentid" />
+		<result property="schedule_idschedule" column="schedule_idschedule" />
+		<result property="starttime" column="starttime" />
+		<result property="endtime" column="endtime" />
+	</resultMap>
+
+	<!-- 스케쥴 이벤트 리스트 검색 -->
+	<!-- schedule_idschedule로 검색, 또는 전체검색 -->
+	<select id="selectSche_tableList"
+		parameterType="project.com.tripinsite.model.Sche_table" resultMap="sche_table">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT idsche_table, api_contentid, schedule_idschedule, starttime, endtime
+		FROM sche_table
+		<if test="schedule_idschedule != 0">
+			WHERE schedule_idschedule = #{schedule_idschedule}
+		</if>		
+	</select>
+	
+	<!-- 스케쥴 이벤트 한개 검색 -->
+	<select id="selectSche_table"
+		parameterType="project.com.tripinsite.model.Sche_table" resultMap="sche_table">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT idsche_table, api_contentid, schedule_idschedule, starttime, endtime
+		FROM sche_table
+		WHERE idsche_table = #{idsche_table}
+	</select>
+		
+	<!-- 스케쥴 이벤트 저장 -->
+	<insert id="insertSche_table" parameterType="project.com.tripinsite.model.Sche_table" 
+	useGeneratedKeys="true" keyProperty="idsche_table">
+		INSERT INTO sche_table 
+		(api_contentid, schedule_idschedule, starttime, endtime) 
+		VALUES (#{api_contentid}, #{schedule_idschedule}, #{starttime}, #{endtime})
+		<selectKey resultType="int" keyProperty="idsche_table" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<!-- 스케쥴 이벤트 수정 -->
+	<update id="updateSche_table" parameterType="project.com.tripinsite.model.Sche_table" >
+		UPDATE sche_table 
+		SET starttime=#{starttime}, endtime=#{endtime}
+		WHERE idsche_table = #{idsche_table} 
+	</update>
+	
+	<!-- 스케쥴 이벤트 삭제 -->
+	<delete id="deleteSche_table" parameterType="project.com.tripinsite.model.Sche_table">
+		DELETE FROM sche_table
+		<where>
+			<choose>
+				<when test="schedule_idschedule != 0">
+				schedule_idschedule=#{schedule_idschedule}
+				</when>
+				<otherwise>
+				idsche_table=#{idsche_table}
+				</otherwise>
+			</choose>
+		</where>
+	</delete>
+</mapper>

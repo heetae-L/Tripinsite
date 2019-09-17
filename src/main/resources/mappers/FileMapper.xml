@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="FileMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="file" type="project.com.tripinsite.model.File">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idfile" column="idfile" />
+		<result property="origin_name" column="origin_name" />
+		<result property="file_dir" column="file_dir" />
+		<result property="file_name" column="file_name" />
+		<result property="content_type" column="content_type" />
+		<result property="file_size" column="file_size" />
+		<result property="reg_date" column="reg_date" />
+		<result property="edit_date" column="edit_date" />
+		<result property="board_idboard" column="board_idboard" />
+	</resultMap>
+
+	<!-- 게시물에 속한 이미지중 첫번째 이미지를 조회한다. -->
+	<select id="selectFileList"
+		parameterType="project.com.tripinsite.model.File" resultMap="file">
+		SELECT
+		idfile, origin_name,
+		file_dir,file_name,content_type,file_size,reg_date,edit_date,board_idboard
+		FROM file
+		WHERE board_idboard = #{board_idboard}
+		LIMIT 0,1
+	</select>
+	<!-- 게시글에 속한 첨부파일의 정보를 저장한다. -->
+	<insert id="insertFile" parameterType="project.com.tripinsite.model.File" 
+		useGeneratedKeys="true" keyProperty="idfile">
+		INSERT INTO file(
+			origin_name, file_dir, file_name, content_type, file_size, reg_date, edit_date, board_idboard
+		) VALUES (
+			#{origin_name}, #{file_dir}, #{file_name}, #{content_type}, #{file_size}, now(), now(), #{board_idboard}
+		)
+	</insert>
+	<!-- 하나의 게시물에 속한 파일목록을 조회한다. -->
+	<select id="selectFileListAll" parameterType="project.com.tripinsite.model.File"
+		resultMap="file">
+		SELECT idfile, origin_name, file_dir, file_name, content_type, file_size,  
+				reg_date, edit_date, board_idboard
+		FROM	file
+		WHERE 	board_idboard=#{board_idboard}
+	</select>
+	
+	<!-- 하나의 게시물에 속한 파일목록수 조회한다. -->
+	<select id="selectFileListCount" parameterType="project.com.tripinsite.model.File"
+		resultType="int">
+		SELECT count(idfile)
+		FROM	file
+		WHERE 	board_idboard=#{board_idboard}
+	</select>
+	
+	<!-- 게시글에 속한 파일 전체 삭제하기 -->
+	<delete id="deleteFileAll" parameterType="project.com.tripinsite.model.File">
+		DELETE FROM file WHERE board_idboard=#{board_idboard}
+	</delete>
+	
+	<!-- 하나의 파일을 조회한다. -->
+	<select id="selectFile" parameterType="project.com.tripinsite.model.File"
+		resultMap="file">
+		SELECT file_dir, file_name FROM file WHERE idfile=#{idfile}	
+	</select>
+	
+	<!-- 하나의 파일을 삭제한다. -->
+	<delete id="deleteFile" parameterType="project.com.tripinsite.model.File">
+		DELETE FROM file WHERE idfile=#{idfile}
+	</delete>
+</mapper>

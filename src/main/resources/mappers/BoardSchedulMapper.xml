@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="BoardSchedulMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="board"
+		type="project.com.tripinsite.model.Board_Schedule">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idboard" column="idboard" />
+		<result property="category" column="category" />
+		<result property="member_id" column="member_id" />
+		<result property="subject" column="subject" />
+		<result property="writer_nickname" column="writer_nickname" />
+		<result property="writer_pw" column="writer_pw" />
+		<result property="content" column="content" />
+		<result property="hit" column="hit" />
+		<result property="reg_date" column="reg_date" />
+		<result property="edit_date" column="edit_date" />
+		<result property="ip_address" column="ip_address" />
+		<result property="is_notice" column="is_notice" />
+		<result property="theme" column="theme" />
+		<result property="privit" column="privit" />
+		<result property="love" column="love" />
+		<result property="imagePath" column="imagePath" />
+		<result property="idschedule" column="idschedule" />
+		<result property="tag" column="tag" />
+		<result property="start_day" column="start_day" />
+		<result property="end_day" column="end_day" />
+
+	</resultMap>
+
+	<!-- 스토리 테마 조회순 정렬 검색을 위한 기능 정의 -->
+	<select id="selectThemeBoardList"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultMap="board">
+		SELECT
+		b.idboard,b.category,b.member_id,b.subject,b.writer_nickname,b.writer_pw,b.content,
+		b.hit as hit,
+		DATE_FORMAT(b.reg_date,'%Y-%m-%d') as reg_date,
+		DATE_FORMAT(b.edit_date, '%Y-%m-%d') as edit_date,
+		b.ip_address,b.is_notice,s.theme,s.privit,s.idschedule,s.tag,
+		(SELECT
+		count(idlove) FROM
+		love WHERE schedule_idschedule =
+		s.idschedule) as
+		love
+		, (SELECT concat(file_dir,'/',file_name) FROM file
+		WHERE
+		board_idboard = b.idboard AND
+		content_type LIKE
+		('image/%')
+		ORDER BY
+		idfile
+		ASC LIMIT 0,1
+		) as imagePath
+
+		FROM schedule s
+		INNER JOIN board b on
+		b.idboard = s.board_idboard
+		<where>
+			s.theme=#{theme} AND s.privit = 0
+			<if test="isSort == true">
+				ORDER BY love DESC
+				LIMIT 0, 8
+			</if>
+			<if test="isSort == false">
+				ORDER BY reg_date ASC
+				LIMIT 0, 8
+			</if>
+		</where>
+	</select>
+
+	<!-- 스토리 키워드 조회순 정렬 검색을 위한 기능 정의 -->
+	<select id="selectKeywordBoardList"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultMap="board">
+		SELECT
+		b.idboard,b.category,b.member_id,b.subject,b.writer_nickname,b.writer_pw,b.content,
+		b.hit as hit,
+		DATE_FORMAT(b.reg_date,'%Y-%m-%d') as reg_date,
+		DATE_FORMAT(b.edit_date, '%Y-%m-%d') as edit_date,
+		b.ip_address,b.is_notice,s.theme,s.privit,s.idschedule,s.tag,
+		(SELECT
+		count(idlove) FROM
+		love WHERE schedule_idschedule =
+		s.idschedule) as
+		love
+		, (SELECT concat(file_dir,'/',file_name) FROM file
+		WHERE
+		board_idboard = b.idboard AND
+		content_type LIKE
+		('image/%')
+		ORDER BY
+		idfile
+		ASC LIMIT 0,1
+		) as imagePath
+
+		FROM schedule s
+		INNER JOIN board b on
+		b.idboard =
+		s.board_idboard
+		WHERE
+		s.subject like
+		concat('%',#{subject},'%') AND s.privit = 0
+		ORDER BY
+		reg_date ASC
+		LIMIT
+		0,8
+	</select>
+
+	<!-- 스토리 게시판 구현을 위한 기능 정의 -->
+	<select id="selectStoryBoardList"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultMap="board">
+		SELECT
+		b.idboard,b.category,b.member_id,b.subject,b.writer_nickname,b.writer_pw,b.content,
+		b.hit as hit,
+		b.reg_date,
+		DATE_FORMAT(b.edit_date, '%Y-%m-%d') as
+		edit_date,
+		b.ip_address,b.is_notice,s.theme,s.privit,s.idschedule,s.tag,
+		(SELECT
+		count(idlove) FROM
+		love WHERE schedule_idschedule =
+		s.idschedule) as
+		love
+		, (SELECT concat(file_dir,'/',file_name) FROM file
+		WHERE
+		board_idboard = b.idboard AND
+		content_type LIKE
+		('image/%')
+		ORDER BY
+		idfile
+		ASC LIMIT 0,1
+		) as imagePath
+
+		FROM schedule s
+		INNER JOIN board b on
+		b.idboard = s.board_idboard
+		<where>
+			b.category=#{category} AND s.privit = 0
+			<if test="isSort == true">
+				ORDER BY love DESC, reg_date DESC
+				LIMIT #{limitStart}, #{listCount}
+			</if>
+			<if test="isSort == false">
+				ORDER BY reg_date DESC
+				LIMIT #{limitStart}, #{listCount}
+			</if>
+		</where>
+	</select>
+
+	<!-- 게시물 하나에 대한 조회 -->
+	<select id="selectStoryBoardView"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultMap="board">
+		SELECT
+		b.idboard,b.category,b.member_id,b.subject,b.writer_nickname,b.writer_pw,b.content,
+		b.hit as hit,
+		DATE_FORMAT(b.reg_date,'%Y-%m-%d') as reg_date,
+		DATE_FORMAT(b.edit_date, '%Y-%m-%d') as edit_date,
+		b.ip_address,b.is_notice,s.theme,s.privit,s.idschedule,s.tag,
+		(SELECT
+		count(idlove) FROM
+		love WHERE schedule_idschedule =
+		s.idschedule) as
+		love,
+		DATE_FORMAT(s.start_day,'%Y-%m-%d') as start_day,
+		DATE_FORMAT(s.end_day,'%Y-%m-%d') as end_day
+
+		FROM schedule s
+		INNER JOIN
+		board b on
+		b.idboard = s.board_idboard
+		WHERE
+		b.category=#{category} AND
+		b.idboard = #{idboard}
+	</select>
+
+	<!-- 이전글 정보를 조회한다. -->
+	<select id="selectPrevStoryBoard"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultMap="board">
+		SELECT
+		b.idboard,b.category,b.member_id,b.subject,b.writer_nickname,b.writer_pw,b.content,
+		b.hit as hit,
+		DATE_FORMAT(b.reg_date,'%Y-%m-%d') as reg_date,
+		DATE_FORMAT(b.edit_date, '%Y-%m-%d') as edit_date,
+		b.ip_address,b.is_notice,s.theme,s.privit,s.idschedule,s.tag,
+		(SELECT
+		count(idlove) FROM
+		love WHERE schedule_idschedule =
+		s.idschedule) as
+		love,
+		DATE_FORMAT(s.start_day,'%Y-%m-%d') as start_day,
+		DATE_FORMAT(s.end_day,'%Y-%m-%d') as end_day
+
+		FROM schedule s
+		INNER JOIN
+		board b on
+		b.idboard = s.board_idboard
+		WHERE
+		category=#{category} AND
+		idboard &lt;
+		#{idboard} AND s.privit = 0
+		ORDER BY idboard
+		DESC
+		LIMIT 0, 1
+	</select>
+
+	<!-- 다음글 정보를 조회한다. -->
+	<select id="selectNextStoryBoard"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultMap="board">
+		SELECT
+		b.idboard,b.category,b.member_id,b.subject,b.writer_nickname,b.writer_pw,b.content,
+		b.hit as hit,
+		DATE_FORMAT(b.reg_date,'%Y-%m-%d') as reg_date,
+		DATE_FORMAT(b.edit_date, '%Y-%m-%d') as edit_date,
+		b.ip_address,b.is_notice,s.theme,s.privit,s.idschedule,s.tag,
+		(SELECT
+		count(idlove) FROM
+		love WHERE schedule_idschedule =
+		s.idschedule) as
+		love,
+		DATE_FORMAT(s.start_day,'%Y-%m-%d') as start_day,
+		DATE_FORMAT(s.end_day,'%Y-%m-%d') as end_day
+
+		FROM schedule s
+		INNER JOIN
+		board b on
+		b.idboard = s.board_idboard
+		WHERE
+		category=#{category} AND
+		idboard &gt;
+		#{idboard} AND s.privit = 0
+		ORDER BY idboard
+		ASC
+		LIMIT 0, 1
+	</select>
+
+	<!-- 게시글 수정 -->
+	<update id="updateStoryBoard"
+		parameterType="project.com.tripinsite.model.Board_Schedule">
+		UPDATE schedule s INNER JOIN board b ON b.idboard =
+		s.board_idboard
+		SET
+		b.subject=#{subject},s.subject=#{subject},b.content=#{content},s.theme=#{theme},s.tag=#{tag},s.privit=#{privit},b.edit_date=now()
+		WHERE
+		b.category = "story" AND b.idboard = #{idboard}
+	</update>
+
+	<!-- 비밀번호를 검사한다. -->
+	<select id="selectScheduleCountPassword"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultType="int">
+		SELECT COUNT(idboard) FROM board b
+		INNER JOIN schedule s
+		ON
+		idboard = board_idboard
+		WHERE b.idboard=#{idboard}
+		AND
+		s.idschedule=#{idschedule} AND b.writer_pw=#{writer_pw}
+	</select>
+
+	<!-- 나의 게시물 수를 조회한다. -->
+	<select id="selectMyScheduleCount"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultType="int">
+		SELECT COUNT(idboard) FROM board
+		<where>
+			member_id=#{member_id} AND
+			is_notice=0 AND
+			category=#{category}
+		</where>
+	</select>
+
+	<!-- 스토리 게시판 구현을 위한 기능 정의 -->
+	<select id="selectMyStoryBoardList"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultMap="board">
+		SELECT
+		b.idboard,b.category,b.member_id,b.subject,b.writer_nickname,
+		b.writer_pw,b.content, b.hit as hit,
+		DATE_FORMAT(b.reg_date,'%Y-%m-%d') as reg_date,
+		DATE_FORMAT(b.edit_date, '%Y-%m-%d') as edit_date,
+		b.ip_address,b.is_notice,s.theme,s.privit,s.idschedule,s.tag,
+		(SELECT
+		count(idlove) FROM
+		love WHERE schedule_idschedule =
+		s.idschedule) as
+		love
+		FROM schedule s
+		INNER JOIN board b on
+		b.idboard = s.board_idboard
+		WHERE b.member_id=#{member_id}
+		ORDER BY idboard
+		DESC
+		LIMIT #{limitStart}, #{listCount}
+	</select>
+
+	<!-- 게시물 삭제를 위한 스케쥴 테이블 삭제 처리 -->
+	<delete id="deleteSche_table"
+		parameterType="project.com.tripinsite.model.Board_Schedule">
+		DELETE FROM sche_table
+		WHERE
+		schedule_idschedule=#{idschedule}
+	</delete>
+
+	<!-- 게시물 삭제를 위한 좋아요 삭제 처리 -->
+	<delete id="deleteLove"
+		parameterType="project.com.tripinsite.model.Board_Schedule">
+		DELETE FROM love WHERE
+		schedule_idschedule=#{idschedule}
+	</delete>
+
+	<!-- 게시물 삭제를 위한 스케줄 삭제 처리 -->
+	<delete id="deleteSchedule"
+		parameterType="project.com.tripinsite.model.Board_Schedule">
+		DELETE FROM schedule WHERE
+		idschedule=#{idschedule}
+	</delete>
+
+	<!-- 게시물 삭제를 위한 댓글 삭제 처리 -->
+	<delete id="deleteComment"
+		parameterType="project.com.tripinsite.model.Board_Schedule">
+		DELETE FROM comment WHERE board_idboard=#{idboard}
+	</delete>
+
+	<!-- 게시물 삭제를 위한 파일 삭제 처리 -->
+	<delete id="deleteFile"
+		parameterType="project.com.tripinsite.model.Board_Schedule">
+		DELETE FROM file WHERE board_idboard=#{idboard}
+	</delete>
+
+	<!-- 게시물 삭제 처리 -->
+	<delete id="deleteBoard"
+		parameterType="project.com.tripinsite.model.Board_Schedule">
+		DELETE FROM board WHERE idboard=#{idboard}
+	</delete>
+
+	<!-- 자신의 게시물인지 검사한다 -->
+	<select id="selectScheduleCountByMemberId"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultType="int">
+		SELECT
+		COUNT(idboard) FROM board
+		WHERE category=#{category}
+		AND
+		idboard=#{idboard} AND member_id=#{member_id}
+	</select>
+	
+	<!-- 전체 게시물 수를 조회한다. -->
+	<select id="selectScheduleCount"
+		parameterType="project.com.tripinsite.model.Board_Schedule"
+		resultType="int">
+		SELECT COUNT(idboard) FROM board
+		<where>
+			is_notice=0 AND
+			category=#{category}
+		</where>
+	</select>
+</mapper>

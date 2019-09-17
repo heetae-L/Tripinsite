@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="LoveMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="love" type="project.com.tripinsite.model.Love">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idlove" column="idlove" />
+		<result property="member_id" column="member_id" />
+		<result property="schedule_idschedule"
+			column="schedule_idschedule" />
+	</resultMap>
+
+	<!-- 좋아요를 누른 글인지 조회 -->
+	<select id="selectLoveList"
+		parameterType="project.com.tripinsite.model.Love" resultType="int">
+		SELECT
+		COUNT(idlove) FROM love
+		WHERE member_id = #{member_id} AND
+		schedule_idschedule = #{schedule_idschedule}
+	</select>
+
+	<!-- 좋아요 추가 -->
+	<insert id="insertLove"
+		parameterType="project.com.tripinsite.model.Love"
+		useGeneratedKeys="true" keyProperty="idlove">
+		INSERT INTO love
+		(member_id,schedule_idschedule) VALUES
+		(#{member_id},#{schedule_idschedule})
+	</insert>
+
+	<!-- 좋아요 삭제 -->
+	<delete id="deleteLove"
+		parameterType="project.com.tripinsite.model.Love">
+		DELETE FROM love WHERE member_id=#{member_id} AND
+		schedule_idschedule=#{schedule_idschedule}
+	</delete>
+	
+	<!-- 회원탈퇴시  좋아요 memberid 수정 -->
+	<update id="updateLoveMemberOut" parameterType="project.com.tripinsite.model.Love">
+		UPDATE love 
+		SET	member_id=null
+		WHERE member_id=#{member_id}
+	</update>
+</mapper>

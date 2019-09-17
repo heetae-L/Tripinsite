@@ -1,0 +1,50 @@
+
+* {
+	padding: 0;
+	margin: 0;
+}
+html, body {
+	height: 100%;
+}
+ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+/* 머리판부분 css */
+.header {
+	background-color: #303a50;
+	height: 150px;
+	color: #eee;
+	margin-top: 48px;
+	margin-bottom: 40px;
+}
+
+/* 관리선택 탭바, 페이지 표시부분 가로정렬 css */
+ul li {
+	display: inline-block;
+	
+}
+
+
+/* 게시판 부분 css */
+.body tr th, td {
+	text-align: center;
+	margin: auto;
+}
+
+/* 하단 버튼 부분 css */
+#bot-btn  a {
+	display: inline-block;
+	text-decoration: none;
+	color: black;
+}
+
+
+
+
+
+
+
+

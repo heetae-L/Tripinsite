@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="BoardLoveMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="love"
+		type="project.com.tripinsite.model.Board_Love">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idlove" column="idlove" />
+		<result property="member_id" column="member_id" />
+		<result property="schedule_idschedule"
+			column="schedule_idschedule" />
+		<result property="subject" column="subject" />
+		<result property="writer_nickname"
+			column="writer_nickname" />
+		<result property="reg_date" column="reg_date" />
+		<result property="idboard" column="idboard" />
+	</resultMap>
+
+	<!-- 마이페이지 즐겨찾기한 글 -->
+	<select id="selectBookMark"
+		parameterType="project.com.tripinsite.model.Board_Love" resultMap="love">
+		select
+		l.idlove as idlove,(select board_idboard from schedule where idschedule = schedule_idschedule ) as
+		idboard, l.schedule_idschedule,b.subject as subject,b.writer_nickname as
+		writer_nickname,DATE_FORMAT(b.reg_date,'%Y-%m-%d') as reg_date
+		from love l
+		inner join schedule s
+		on
+		l.schedule_idschedule =
+		s.idschedule
+		inner join
+		board b on b.idboard =
+		s.board_idboard
+		where
+		l.member_id = #{member_id};
+	</select>
+</mapper>

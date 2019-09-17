@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+
+	<!-- 콘솔로 로그를 남김 -->
+	<appender name="CONSOLE"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<charset>UTF-8</charset>
+			<!-- 로그 메시지 패턴 -->
+			<Pattern>
+				%d{HH:mm:ss.SSS} [%thread] %-4level %logger{4} - %msg%n
+			</Pattern>
+		</encoder>
+	</appender>
+
+	<property name="LOG_DIR" value="C:/LHT/JSP/upload/logs" />
+
+	<appender name="LOGFILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder
+			class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<Pattern>%d{HH:mm:ss.SSS} [%thread] %-4level %logger{4} - %msg%n
+			</Pattern>
+		</encoder>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/log_%d{yyyy-MM-dd}_%i.log</fileNamePattern>
+				<timeBasedFileNamingAndTriggeringPolicy
+					class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+					<maxFileSize>500KB</maxFileSize>
+				</timeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>1</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<!-- RULES for logging DEBUG < INFO < WARN < ERROR < FATAL. -->
+	<logger name="main" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="ScheduleControl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="Admin" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="Download" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="BBSComment" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="BBSDocument" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="MemberController" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="AdminServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="ApiServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="BoardServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="CommentServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="FileServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="LoveServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="MemberServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="ScheduleServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="ScheTableApiServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+	<logger name="ScheTableServiceImpl" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="LOGFILE" />
+	</logger>
+
+	<root>
+		<level value="INFO" />
+		<appender-ref ref="CONSOLE" />
+	</root>
+</configuration>

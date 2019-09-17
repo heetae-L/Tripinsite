@@ -1,0 +1,28 @@
+.body-title {
+	border: 1px;
+	border-color: #eee;
+}
+
+.body-view {
+	text-align: right;
+}
+
+.modal-header {
+	text-align: center;
+	padding: 20px;
+}
+
+.modal-body {
+	text-align: center;
+}
+
+.area_view {
+	text-align: right;
+}
+
+.caption h3 {
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	word-wrap: normal;
+	overflow: hidden;
+}

@@ -1,0 +1,5 @@
+.free-title ,.writer {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

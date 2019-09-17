@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="ScheduleMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="schedule"
+		type="project.com.tripinsite.model.Schedule">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idschedule" column="idschedule" />
+		<result property="member_id" column="member_id" />
+		<result property="subject" column="subject" />
+		<result property="start_day" column="start_day" />
+		<result property="end_day" column="end_day" />
+		<result property="tag" column="tag" />
+		<result property="theme" column="theme" />
+		<result property="privit" column="privit" />
+		<result property="board_idboard" column="board_idboard" />
+	</resultMap>
+
+	<!-- 여행계획 정보 리스트를 검색 -->
+	<!-- 전체 리스트 검색 , (privit=0 이면 공개, 1이면 비공개), member_id 검색기능, 제목 검색, 여행종류 검색, 여행테마 검색 -->
+	<select id="selectScheduleList" parameterType="project.com.tripinsite.model.Schedule" resultMap="schedule">
+		SELECT idschedule, member_id, subject, start_day, end_day, tag, theme, privit, board_idboard
+		FROM schedule
+		<if test="privit==0 || member_id!=0 || subject!=null || tag!=0 || theme!=0">
+		<where>
+			<choose>
+				<when test="member_id != 0">
+					member_id=#{member_id}
+				</when>
+				<when test="subject != null">
+					subject LIKE "%#{subject}%"
+					<if test="privit == 0">AND privit=#{privit}</if>
+				</when>
+				<when test="tag != 0">
+					tag=#{tag}
+					<if test="privit == 0">AND privit=#{privit}</if>
+				</when>
+				<otherwise>
+					theme!=0
+					<if test="privit == 0">AND privit=#{privit}</if>
+				</otherwise>
+			</choose>
+		</where>
+		</if>
+		
+	</select>
+	
+	<!-- 여행계획 정보 한 개를 검색 -->
+	<select id="selectSchedule" parameterType="project.com.tripinsite.model.Schedule" resultMap="schedule">
+		SELECT idschedule, member_id, subject, start_day, end_day, tag, theme, privit, board_idboard
+		FROM schedule
+		WHERE idschedule=#{idschedule}
+	</select>
+	
+	<!-- 여행계획 정보 저장 -->
+	<insert id="insertSchedule"	parameterType="project.com.tripinsite.model.Schedule" 
+	useGeneratedKeys="true" keyProperty="idschedule" >
+		INSERT INTO schedule
+		(member_id, subject, start_day, end_day, tag, theme, privit <if test="board_idboard!=0">, board_idboard</if>) 
+		VALUES (#{member_id}, #{subject}, #{start_day}, #{end_day}, #{tag}, #{theme}, #{privit} <if test="board_idboard!=0">, #{board_idboard}</if>)
+		<selectKey resultType="int" keyProperty="idschedule" order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<!-- 여행계획 정보 수정 -->
+	<update id="updateSchedule"	parameterType="project.com.tripinsite.model.Schedule">
+		UPDATE schedule
+		SET subject=#{subject}, tag=#{tag}, theme=#{theme}, privit=#{privit}, board_idboard=#{board_idboard}
+		WHERE idschedule=#{idschedule} and member_id=#{member_id}
+	</update>
+	
+	<!-- 여행계획 중 시작일 종료일 수정 -->
+	<update id="updateScheduleDate" parameterType="project.com.tripinsite.model.Schedule">
+		UPDATE schedule
+		SET start_day=#{start_day}, end_day=#{end_day}
+		WHERE idschedule=#{idschedule}
+	</update>
+	
+	<!-- 여행계획 정보 삭제 -->
+	<delete id="deleteSchedule"	parameterType="project.com.tripinsite.model.Schedule">
+		DELETE FROM schedule
+		WHERE idschedule=#{idschedule}
+	</delete>
+	<!-- 특정 회원과의 게시물 참조 해제하기 -->
+	<update id="updateScheMemberOut" parameterType="project.com.tripinsite.model.Schedule">
+		UPDATE schedule 
+		SET	member_id=nulls
+		WHERE member_id=#{member_id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,54 @@
+/** 서브메뉴가 펼쳐지더라도 다른 요소들 위에 떠 있어야 하므로, Position처리 */
+ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+#navbar {
+	border-color: transparent;
+	background: #141e3c;
+}
+
+#login input {
+	border-radius: 8px;
+}
+
+/** 메뉴에 포함된 모든 링크에 대한 크기,배경 지정 및 글자 꾸미기 */
+.menu-item a {
+	display: block;
+	width: 100px;
+	height: 48px;
+	margin: 0 10px;
+	line-height: 48px;
+	background-color: #141e3c;
+	text-align: center;
+	font-weight: bold;
+	color: #eee;
+	text-decoration: none;
+	font-size: 16px;
+}
+
+.menu-item a:hover {
+	background-color: #ff8000;
+}
+
+.sub {
+	position: absolute;
+	z-index: 1000;
+	display: none;
+}
+
+.menu-item {
+	position: relative;
+}
+
+.dropdown {
+	font-size: 16px;
+	margin-top: 8.5px;
+}
+
+.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:focus,
+	.navbar-inverse .navbar-nav>.open>a:hover {
+	background-color: #141e3c;
+}

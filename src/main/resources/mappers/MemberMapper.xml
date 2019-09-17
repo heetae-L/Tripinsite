@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="MemberMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="member"
+		type="project.com.tripinsite.model.Member">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="id" column="id" />
+		<result property="email" column="email" />
+		<result property="password" column="password" />
+		<result property="nickname" column="nickname" />
+		<result property="age" column="age" />
+		<result property="gender" column="gender" />
+		<result property="postcode" column="postcode" />
+		<result property="addr1" column="addr1" />
+		<result property="addr2" column="addr2" />
+		<result property="reg_date" column="reg_date" />
+		<result property="edit_date" column="edit_date" />
+	</resultMap>
+	<!-- 로그인 처리를 위한 단일행 조회 기능 정의 -->
+	<select id="selectLoginInfo"
+		parameterType="project.com.tripinsite.model.Member" resultMap="member">
+		SELECT *
+		FROM member
+		WHERE email=#{email} AND
+		password=password(#{password})
+		ORDER BY id DESC
+		LIMIT 0, 1
+	</select>
+
+	<!-- 관리자권한으로 회원 목록을 조회한다. -->
+	<select id="selectMemberList"
+		parameterType="project.com.tripinsite.model.Member" resultMap="member">
+		SELECT id, email, nickname, age, gender, postcode, addr1, addr2,
+		DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+		DATE_FORMAT(edit_date,
+		'%Y-%m-%d %H:%i:%s') as edit_date FROM member
+
+		<where>
+			<if test="email !=null">
+				email LIKE concat('%', #{email}, '%')
+			</if>
+			<if test="nickname !=null">
+				OR nickname LIKE concat('%', #{nickname}, '%')
+			</if>
+		</where>
+
+		ORDER BY id DESC
+		LIMIT #{limitStart}, #{listCount}
+	</select>
+
+	<!-- 관리자권한 회원 정보 수정하기 -->
+	<update id="updateMemberbyAdmin"
+		parameterType="project.com.tripinsite.model.Member">
+		UPDATE member SET
+		nickname =#{nickname},
+		age =#{age},
+		gender = #{gender},
+		postcode =#{postcode},
+		addr1 = #{addr1},
+		addr2 =
+		#{addr2},
+		edit_date = now()
+		WHERE id=#{id}
+	</update>
+
+	<!-- 이메일 중복체크 -->
+	<select id="selectEmailCount"
+		parameterType="project.com.tripinsite.model.Member" resultType="int">
+		SELECT
+		count(id) FROM member WHERE email=#{email}
+	</select>
+
+	<!-- 닉네임 중복체크 -->
+	<select id="selectNicknameCount"
+		parameterType="project.com.tripinsite.model.Member" resultType="int">
+		SELECT
+		count(id) FROM member WHERE nickname=#{nickname}
+	</select>
+	
+	<!-- 회원정보를 저장한다 : 가입 -->
+	<insert id="insertMember"
+		parameterType="project.com.tripinsite.model.Member"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO member (
+		email,
+		password, nickname,
+		age, gender, postcode,
+		addr1, addr2,
+		reg_date,
+		edit_date
+		) VALUES (
+		#{email}, password(#{password}),
+		#{nickname},#{age}, #{gender},
+		#{postcode}, #{addr1}, #{addr2},
+		now(),
+		now()
+		)
+	</insert>
+	<!-- 회원에 대한 정보를 조회한다. -->
+	<select id="selectMember"
+		parameterType="project.com.tripinsite.model.Member" resultMap="member">
+		SELECT
+		id, email, nickname, age, gender, postcode, addr1,
+		addr2,DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+		DATE_FORMAT(edit_date,
+		'%Y-%m-%d %H:%i:%s') as edit_date FROM member
+		WHERE id=#{id}
+	</select>
+
+	<!-- 이전 회원 목록을 조회한다. -->
+	<select id="selectPrevMember"
+		parameterType="project.com.tripinsite.model.Member" resultMap="member">
+		SELECT
+		id, email, nickname, age, gender, postcode, addr1,
+		addr2,DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+		DATE_FORMAT(edit_date,
+		'%Y-%m-%d %H:%i:%s') as edit_date FROM member
+		WHERE id &lt; #{id}
+		ORDER BY id DESC
+		LIMIT 0,1
+	</select>
+
+	<!-- 다음 회원 목록을 조회한다. -->
+	<select id="selectNextMember"
+		parameterType="project.com.tripinsite.model.Member" resultMap="member">
+		SELECT
+		id, email, nickname, age, gender, postcode, addr1,
+		addr2,DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+		DATE_FORMAT(edit_date,
+		'%Y-%m-%d %H:%i:%s') as edit_date FROM member
+		WHERE id &gt; #{id}
+		ORDER BY id DESC
+		LIMIT 0,1
+	</select>
+
+	<!-- 전체 회원 수를 조회한다. -->
+	<select id="selectMemberCount"
+		parameterType="project.com.tripinsite.model.Member" resultType="int">
+		SELECT COUNT(id) FROM member
+		<where>
+			<if test="email !=null or nickname !=null">
+				<if test="email !=null">
+					email LIKE concat('%', #{email}, '%')
+				</if>
+				<if test="nickname !=null">
+					OR nickname LIKE concat('%', #{nickname}, '%')
+				</if>
+			</if>
+		</where>
+	</select>
+
+	<!-- 회원 정보 수정하기 -->
+	<update id="updateMember"
+		parameterType="project.com.tripinsite.model.Member">
+		UPDATE member SET
+		nickname =#{nickname},
+		age =#{age},
+		postcode =#{postcode},
+		addr1 = #{addr1},
+		addr2 = #{addr2},
+		edit_date = now()
+
+<if test="password != null and password != ''">
+			, password=password(#{password})
+		</if>
+		WHERE id=#{id}
+	</update>
+
+	<!-- 현재 로그인 중인 회원의 비밀번호를 검사한다. -->
+	<select id="selectMemberPasswordCount"
+		parameterType="project.com.tripinsite.model.Member" resultType="int">
+		SELECT
+		count(id) FROM member
+		WHERE id=#{id} AND password=password(#{password})
+	</select>
+	<!-- 회원삭제전 참조해제 처리 -->
+	<update id="fkoffMember"
+		parameterType="project.com.tripinsite.model.Member">
+		UPDATE schedule as s, board as b, love as l, comment as c, member as m
+		SET s.member_id=0, b.member_id=0,l.member_id=0,c.member_id=0
+		WHERE m.id=#{id} 
+	</update>
+	<!-- 회원정보 삭제하기 -->
+	<delete id="deleteMember"
+		parameterType="project.com.tripinsite.model.Member">
+		DELETE FROM member WHERE id=#{id}
+	</delete>
+	
+	<!-- 비밀번호 재발급: 이메일주소가 일치하는 비밀번호를 변경한다. -->
+	<update id="updateMemberPasswordByEmail"
+		parameterType="project.com.tripinsite.model.Member">
+		UPDATE member SET password=password(#{password}),
+		edit_date=now()
+		WHERE email=#{email};
+	</update>
+</mapper>

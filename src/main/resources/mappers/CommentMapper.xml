@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="CommentMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="comment"
+		type="project.com.tripinsite.model.Comment">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idcomment" column="idcomment" />
+		<result property="board_idboard" column="board_idboard" />
+		<result property="member_id" column="member_id" />
+		<result property="writer_nickname" column="writer_nickname" />
+		<result property="writer_pw" column="writer_pw" />
+		<result property="content" column="content" />
+		<result property="reg_date" column="reg_date" />
+		<result property="edit_date" column="edit_date" />
+		<result property="ip_address" column="ip_address" />
+	</resultMap>
+
+	<!-- 하나의 게시물에 속한 모든 덧글 조회(목록조회)를 위한 기능 정의 <select id="메서드이름" resultMap="리턴될 Beans의 id"> -->
+	<select id="selectCommentList"
+		parameterType="project.com.tripinsite.model.Comment" resultMap="comment">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT idcomment, writer_nickname, content, 
+			   DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+			   ip_address, member_id, board_idboard
+		FROM comment
+		WHERE  board_idboard=#{board_idboard}
+		ORDER BY idcomment DESC
+	</select>
+	
+	<!-- 덧글 하나에 대한 정보를 조회한다. -->
+	<select id="selectComment" parameterType="project.com.tripinsite.model.Comment" 
+		resultMap="comment">
+		SELECT idcomment, writer_nickname, content, 
+			   DATE_FORMAT(reg_date, '%Y-%m-%d %H:%i:%s') as reg_date,
+			   ip_address, member_id, board_idboard
+		FROM comment
+		WHERE idcomment=#{idcomment}
+	</select>
+	
+	<!-- 덧글 정보 저장하기 -->
+	<insert id="insertComment" parameterType="project.com.tripinsite.model.Comment" 
+		useGeneratedKeys="true" keyProperty="idcomment">
+		INSERT INTO comment (
+			writer_nickname, content, reg_date, edit_date, ip_address, board_idboard,
+			member_id, writer_pw
+		) VALUES (
+			#{writer_nickname}, #{content}, now(), now(), #{ip_address}, #{board_idboard},
+			
+			<choose>
+				<when test="member_id == 0">
+					null, password(#{writer_pw})
+				</when>
+				<otherwise>
+					#{member_id}, #{writer_pw}
+				</otherwise>
+			</choose>
+		)
+	</insert>
+	
+	<!-- 자신의 덧글인지 검사한다 -->
+	<select id="selectCommentCountByMemberId"
+		parameterType="project.com.tripinsite.model.Comment"
+		resultType="int">
+		SELECT COUNT(idcomment) FROM comment
+		WHERE idcomment=#{idcomment} AND member_id=#{member_id}
+	</select>
+	
+	<!-- 비밀번호를 검사한다. -->
+	<select id="selectCommentCountByPw"
+		parameterType="project.com.tripinsite.model.Comment"
+		resultType="int">
+		SELECT COUNT(idcomment) FROM comment
+		WHERE idcomment=#{idcomment} AND writer_pw=password(#{writer_pw})
+	</select>
+	
+	<!-- 덧글 삭제 하기 -->
+	<delete id="deleteComment" parameterType="project.com.tripinsite.model.Comment">
+		DELETE FROM comment WHERE idcomment=#{idcomment}
+	</delete>
+	
+	<!-- 덧글 정보 수정하기 -->
+	<update id="updateComment" parameterType="project.com.tripinsite.model.Comment">
+		UPDATE comment SET
+			writer_nickname=#{writer_nickname},
+			content=#{content},
+			ip_address=#{ip_address},
+			edit_date=now()
+		WHERE idcomment=#{idcomment}
+	</update>
+	
+	<!-- 특정 게시물에 속한 모든 덧글을 삭제한다. -->
+	<delete id="deleteCommentAll" parameterType="project.com.tripinsite.model.Comment">
+		DELETE FROM comment WHERE board_idboard=#{board_idboard}
+	</delete>
+	
+	<!-- 특정 회원과의 게시물 참조 해제하기 -->
+	<update id="updateCommentMemberOut" parameterType="project.com.tripinsite.model.Comment">
+		UPDATE comment 
+		SET	member_id=NULL, edit_date=now()
+		WHERE member_id=#{member_id}
+	</update>
+</mapper>

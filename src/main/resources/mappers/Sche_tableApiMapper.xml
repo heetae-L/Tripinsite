@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 이 파일의 경로를 config.xml에 명시해야 한다. -->
+
+<!-- 이 XML의 구조대로 구현될 클래스의 이름 -->
+<mapper namespace="Sche_tableApiMapper">
+
+	<!-- Beans 클래스의 객체이름(id)과 클래스이름(type)을 명시한다. -->
+	<resultMap id="sche_tableApi"
+		type="project.com.tripinsite.model.Sche_tableApi">
+		<!-- Beans의 멤버변수(property)이름과 대상 테이블의 컬럼(column)을 연결한다. -->
+		<result property="idsche_table" column="idsche_table" />
+		<result property="api_contentid" column="api_contentid" />
+		<result property="schedule_idschedule" column="schedule_idschedule" />
+		<result property="starttime" column="starttime" />
+		<result property="endtime" column="endtime" />
+		<result property="title" column="title" />
+		<result property="areacode" column="areacode" />
+		<result property="sigungucode" column="sigungucode" />
+		<result property="addr1" column="addr1" />
+		<result property="addr2" column="addr2" />
+		<result property="contenttypeid" column="contenttypeid" />
+		<result property="mapx" column="mapx" />
+		<result property="mapy" column="mapy" />
+		<result property="tel" column="tel" />
+	</resultMap>
+
+	<!-- 스케쥴 이벤트 리스트 검색 -->
+	<!-- schedule_idschedule로 검색, 또는 전체검색 -->
+	<select id="selectSche_tableList"
+		parameterType="project.com.tripinsite.model.Sche_table" resultMap="sche_tableApi">
+		<!-- 이 안에서 처리할 SQL문을 명시한다. -->
+		SELECT s.idsche_table, s.api_contentid, s.schedule_idschedule, s.starttime, s.endtime, 
+				a.title, a.areacode, a.sigungucode, a.addr1, a.addr2,
+				a.contenttypeid, a.mapx, a.mapy, a.tel
+		FROM sche_table s inner join api a on s.api_contentid=a.contentid
+		<if test="schedule_idschedule != 0">
+			WHERE schedule_idschedule = #{schedule_idschedule}
+		</if>		
+	</select>
+
+</mapper>
